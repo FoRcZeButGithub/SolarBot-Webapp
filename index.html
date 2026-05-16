@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>HELIOS COMMAND - Overview</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Geist:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#061c36",
+                        "on-secondary-container": "#abb9d6",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "on-primary-fixed-variant": "#004f54",
+                        "tertiary": "#f7f8f8",
+                        "inverse-primary": "#00696f",
+                        "on-secondary-fixed": "#0d1c32",
+                        "surface": "#00132c",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "on-background": "#d5e3ff",
+                        "tertiary-fixed": "#e2e2e2",
+                        "primary": "#e1fdff",
+                        "secondary-container": "#3c4962",
+                        "primary-fixed-dim": "#00dbe7",
+                        "on-tertiary-container": "#5e6060",
+                        "surface-dim": "#00132c",
+                        "surface-container-highest": "#223551",
+                        "on-secondary": "#233148",
+                        "surface-tint": "#00dbe7",
+                        "error-container": "#93000a",
+                        "surface-variant": "#223551",
+                        "inverse-on-surface": "#1d314c",
+                        "outline-variant": "#3a494b",
+                        "on-primary-container": "#006a71",
+                        "on-primary": "#00363a",
+                        "on-surface": "#d5e3ff",
+                        "secondary-fixed": "#d6e3ff",
+                        "outline": "#849495",
+                        "surface-bright": "#273a56",
+                        "on-error": "#690005",
+                        "inverse-surface": "#d5e3ff",
+                        "on-primary-fixed": "#002022",
+                        "secondary": "#b9c7e4",
+                        "on-secondary-fixed-variant": "#39475f",
+                        "secondary-fixed-dim": "#b9c7e4",
+                        "background": "#00132c",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "surface-container-lowest": "#000e23",
+                        "tertiary-container": "#dbdbdb",
+                        "error": "#ffb4ab",
+                        "on-tertiary": "#2f3131",
+                        "primary-container": "#00f2ff",
+                        "primary-fixed": "#74f5ff",
+                        "surface-container": "#0a203b",
+                        "surface-container-high": "#172a46",
+                        "on-surface-variant": "#b9cacb"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Space Grotesk"],
+                        "body-md": ["Geist"],
+                        "headline-md": ["Space Grotesk"],
+                        "headline-lg": ["Space Grotesk"],
+                        "body-lg": ["Geist"],
+                        "data-mono": ["Geist"],
+                        "label-caps": ["Geist"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #00132c;
+            background-image: radial-gradient(circle at 50% 0%, rgba(0, 242, 255, 0.15) 0%, rgba(0, 19, 44, 1) 70%);
+            color: #d5e3ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .glow-primary {
+            box-shadow: 0 0 20px rgba(0, 219, 231, 0.4);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 219, 231, 0.6);
+        }
+
+        .circuit-pattern {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .danger-pulse {
+            animation: pulseDanger 1.5s infinite;
+            border-color: rgba(255, 50, 50, 0.8) !important;
+        }
+
+        @keyframes pulseDanger {
+            0% {
+                box-shadow: 0 0 0 rgba(255, 50, 50, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(255, 50, 50, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 0 0 rgba(255, 50, 50, 0.4);
+            }
+        }
+
+        /* Page switching */
+        .page { display: none; }
+        .page.active { display: flex; flex-direction: column; }
+
+        /* Log table rows */
+        .log-row-critical { border-left: 3px solid #ff4444; }
+        .log-row-warning  { border-left: 3px solid #ffaa00; }
+        .log-row-info     { border-left: 3px solid #00dbe7; }
+
+        /* Slider thumb */
+        input[type=range] { -webkit-appearance: none; appearance: none; height: 4px;
+            background: rgba(0,219,231,0.25); border-radius: 4px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px;
+            border-radius: 50%; background: #00dbe7; cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,219,231,0.7); }
+
+        /* OTA drop zone */
+        .ota-drop { border: 2px dashed rgba(0,219,231,0.35); transition: all .2s; }
+        .ota-drop.drag-over { border-color: #00dbe7; background: rgba(0,219,231,0.08); }
+
+        /* Custom Button Styling for Controller */
+        .ctrl-btn {
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            color: #d5e3ff;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 219, 231, 0.4);
+            color: white;
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body class="font-body-md text-body-md flex h-screen overflow-hidden">
+    <nav
+        class="hidden md:flex flex-col h-full h-screen w-64 bg-surface/40 backdrop-blur-xl border-r border-white/15 shadow-xl flex-shrink-0 z-20">
+        <div class="p-6 border-b border-white/10">
+            <h1 class="font-display-lg text-headline-md text-primary tracking-tighter">SOLAR-BOT 01</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-1">Vigilant System</p>
+        </div>
+        <div class="flex-1 py-6 flex flex-col gap-2 px-4">
+            <a id="nav-overview" class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-primary/10 border-r-2 border-primary transition-transform duration-200"
+                href="#" onclick="showPage('overview');return false;">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                <span class="font-body-md text-body-md">Overview</span>
+            </a>
+            <a id="nav-maintenance" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors duration-200"
+                href="#" onclick="showPage('maintenance');return false;">
+                <span class="material-symbols-outlined">build</span>
+                <span class="font-body-md text-body-md">Maintenance</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex flex-col min-w-0 h-screen">
+        <header
+            class="flex justify-between items-center w-full px-8 h-16 bg-surface-dim/30 backdrop-blur-md border-b border-white/10 z-10 flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <div class="md:hidden">
+                    <span class="material-symbols-outlined text-primary text-2xl">menu</span>
+                </div>
+                <h2 class="font-display-lg text-headline-md text-primary font-bold tracking-tight">HELIOS COMMAND</h2>
+            </div>
+            <div class="flex items-center gap-6">
+                <button id="connect-btn"
+                    class="flex items-center gap-2 bg-primary/20 border border-primary/50 text-primary px-4 py-1.5 rounded-full hover:bg-primary/40 transition-colors text-sm font-bold glow-primary">
+                    <span class="material-symbols-outlined text-sm">cable</span>
+                    CONNECT DEVICE
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 circuit-pattern">
+            <div class="max-w-[1440px] mx-auto h-full flex flex-col">
+
+            <!-- ===== OVERVIEW PAGE ===== -->
+            <div id="page-overview" class="page active">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h3 class="font-headline-lg text-headline-lg text-white glow-text">System Overview</h3>
+                        <p class="font-data-mono text-data-mono text-on-surface-variant mt-2 tracking-widest"
+                            id="system-status-text">UNIT: SBR-01 // STATUS: OFFLINE</p>
+                    </div>
+                    <div
+                        class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full border border-primary/20">
+                        <span class="w-2 h-2 rounded-full bg-on-surface-variant" id="telemetry-dot"></span>
+                        <span class="font-data-mono text-data-mono text-primary" id="connection-status">WAITING
+                            DATA...</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-full auto-rows-min md:auto-rows-fr">
+
+                    <div
+                        class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col justify-between items-center relative overflow-hidden group">
+                        <div class="w-full flex justify-between items-start mb-8">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">MAIN
+                                POWER</span>
+                            <span class="material-symbols-outlined text-primary/50">power_settings_new</span>
+                        </div>
+                        <div class="relative w-32 h-48 flex items-center justify-center" id="power-toggle-container"
+                            style="cursor: pointer;">
+                            <div
+                                class="absolute w-16 h-32 bg-surface-container-lowest rounded-full border border-white/10 shadow-inner flex flex-col justify-between py-2 items-center">
+                                <span class="font-data-mono text-[10px] text-primary/50">ON</span>
+                                <span class="font-data-mono text-[10px] text-on-surface-variant/30">OFF</span>
+                            </div>
+                            <div id="power-btn"
+                                class="absolute top-2 w-20 h-14 bg-surface-bright rounded-full border border-white/20 flex items-center justify-center transition-all duration-300 shadow-lg z-10 transform translate-y-[68px]">
+                                <div id="power-knob-light" class="w-12 h-2 bg-on-surface-variant rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="w-full text-center mt-8">
+                            <p id="power-status"
+                                class="font-headline-md text-headline-md text-on-surface-variant transition-colors">
+                                STANDBY</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col relative overflow-hidden">
+                        <div class="w-full flex justify-between items-start mb-4">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">CORE
+                                ENERGY (INA219)</span>
+                            <span class="material-symbols-outlined text-primary">battery_5_bar</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center justify-center relative">
+                            <div class="relative w-40 h-40 flex items-center justify-center">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" fill="none" r="45" stroke="#223551" stroke-width="6">
+                                    </circle>
+                                    <circle id="battery-ring"
+                                        class="drop-shadow-[0_0_8px_rgba(0,242,255,0.8)] transition-all duration-500"
+                                        cx="50" cy="50" fill="none" r="45" stroke="#00f2ff" stroke-dasharray="283"
+                                        stroke-dashoffset="283" stroke-linecap="round" stroke-width="6"></circle>
+                                </svg>
+                                <div class="absolute flex flex-col items-center justify-center">
+                                    <span class="font-display-lg text-4xl text-white font-bold tracking-tighter"><span
+                                            id="batt-val">0</span><span class="text-xl text-primary">%</span></span>
+                                    <span class="font-data-mono text-[10px] text-primary mt-1"><span
+                                            id="volt-val">0.00</span> V</span>
+                                </div>
+                            </div>
+                            <div class="w-full grid grid-cols-2 gap-4 mt-6">
+                                <div class="bg-surface-container-low/50 rounded p-2 text-center border border-white/5">
+                                    <span
+                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">CURRENT</span>
+                                    <span class="font-data-mono text-data-mono text-white"><span
+                                            id="current-val">0</span> mA</span>
+                                </div>
+                                <div class="bg-surface-container-low/50 rounded p-2 text-center border border-white/5">
+                                    <span
+                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">REMAINING</span>
+                                    <span class="font-data-mono text-data-mono text-primary"><span
+                                            id="remain-val">0</span> min</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="safety-panel"
+                        class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col transition-all duration-300">
+                        <div class="w-full flex justify-between items-start mb-4">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">GYRO
+                                METRICS (MPU6050)</span>
+                            <span class="material-symbols-outlined text-primary/70" id="gyro-icon">explore</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center justify-center">
+                            <div
+                                class="relative w-40 h-40 rounded-full border-2 border-surface-container-high flex items-center justify-center overflow-hidden mb-4">
+                                <div id="horizon-line"
+                                    class="absolute w-full h-full transform transition-transform duration-100 rotate-[0deg]">
+                                    <div class="w-full h-1/2 bg-primary/10 border-b border-primary glow-primary"
+                                        id="horizon-sky"></div>
+                                    <div class="w-full h-1/2 bg-surface-container-lowest"></div>
+                                </div>
+                                <div
+                                    class="absolute w-8 h-8 border border-white/30 rounded-full flex items-center justify-center">
+                                    <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="w-full flex justify-around items-center">
+                                <div class="text-center">
+                                    <span
+                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">PITCH</span>
+                                    <span class="font-data-mono text-body-lg text-white" id="pitch-val">0.0°</span>
+                                </div>
+                                <div class="w-px h-8 bg-white/10"></div>
+                                <div class="text-center">
+                                    <span
+                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">ROLL</span>
+                                    <span class="font-data-mono text-body-lg text-white" id="roll-val">0.0°</span>
+                                </div>
+                                <div class="w-px h-8 bg-white/10"></div>
+                                <div class="text-center">
+                                    <span
+                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">TEMP</span>
+                                    <span class="font-data-mono text-body-lg text-primary"><span
+                                            id="temp-val">0.0</span>°C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl md:col-span-12 p-6 flex flex-col">
+                        <div class="w-full flex justify-between items-start mb-6">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">DRIVE
+                                SYSTEM & ODOMETRY</span>
+                            <div class="flex gap-2">
+                                <span class="material-symbols-outlined text-primary/70">gamepad</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1">
+                            <div class="md:col-span-4 grid grid-rows-2 gap-4">
+                                <div
+                                    class="flex flex-col justify-center border-l-2 border-primary/30 pl-4 h-full bg-surface-container-lowest/50 rounded-r-lg">
+                                    <span class="font-label-caps text-[12px] text-on-surface-variant mb-2">M1 PULSE
+                                        (Revs)</span>
+                                    <span class="font-display-lg text-3xl text-white font-bold tracking-tight"
+                                        id="m1-val">0.00</span>
+                                </div>
+                                <div
+                                    class="flex flex-col justify-center border-l-2 border-primary/30 pl-4 h-full bg-surface-container-lowest/50 rounded-r-lg">
+                                    <span class="font-label-caps text-[12px] text-on-surface-variant mb-2">M2 PULSE
+                                        (Revs)</span>
+                                    <span class="font-display-lg text-3xl text-white font-bold tracking-tight"
+                                        id="m2-val">0.00</span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="md:col-span-4 flex flex-col items-center justify-center border-x border-white/10 px-4">
+                                <span class="font-label-caps text-[10px] text-on-surface-variant mb-4">MANUAL
+                                    OVERRIDE</span>
+                                <div class="grid grid-cols-3 gap-2 w-full max-w-[200px] mb-4">
+                                    <div></div>
+                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F100R0')"
+                                        onmouseup="sendDriveCmd('F0R0')"><span
+                                            class="material-symbols-outlined">keyboard_arrow_up</span></button>
+                                    <div></div>
+                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F0L100')"
+                                        onmouseup="sendDriveCmd('F0R0')"><span
+                                            class="material-symbols-outlined">keyboard_arrow_left</span></button>
+                                    <button
+                                        class="ctrl-btn py-3 bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/30"
+                                        onclick="sendDriveCmd('F0R0')"><span
+                                            class="material-symbols-outlined">stop_circle</span></button>
+                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F0R100')"
+                                        onmouseup="sendDriveCmd('F0R0')"><span
+                                            class="material-symbols-outlined">keyboard_arrow_right</span></button>
+                                    <div></div>
+                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('B100R0')"
+                                        onmouseup="sendDriveCmd('F0R0')"><span
+                                            class="material-symbols-outlined">keyboard_arrow_down</span></button>
+                                    <div></div>
+                                </div>
+                                <button
+                                    class="ctrl-btn w-full max-w-[200px] py-2 border-primary text-primary font-bold text-sm tracking-widest"
+                                    onclick="toggleMotor3()">
+                                    TOGGLE BRUSH (M3)
+                                </button>
+                            </div>
+
+                            <div class="md:col-span-4 h-full min-h-[150px] relative w-full flex flex-col">
+                                <span class="font-label-caps text-[10px] text-on-surface-variant mb-2">TEMPERATURE
+                                    HISTORY (°C)</span>
+                                <div class="flex-1 relative">
+                                    <canvas id="telemetryChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div><!-- end grid -->
+            </div><!-- end page-overview -->
+
+            <!-- ===== MAINTENANCE PAGE ===== -->
+            <div id="page-maintenance" class="page">
+
+                <!-- Header -->
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h3 class="font-headline-lg text-headline-lg text-white glow-text">Maintenance</h3>
+                        <p class="font-data-mono text-data-mono text-on-surface-variant mt-2 tracking-widest">UNIT: SBR-01 // DIAGNOSTICS &amp; CONFIG</p>
+                    </div>
+                </div>
+
+                <!-- ── Section 1: Error Logs & Telemetry History ── -->
+                <div class="glass-panel rounded-xl p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-red-400">error</span>
+                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">ERROR LOGS &amp; TELEMETRY HISTORY</span>
+                        </div>
+                        <button onclick="clearLogs()" class="flex items-center gap-1 text-xs text-on-surface-variant border border-white/10 rounded px-3 py-1 hover:bg-white/5 transition-colors">
+                            <span class="material-symbols-outlined text-sm">delete_sweep</span> CLEAR
+                        </button>
+                    </div>
+
+                    <!-- Filter tabs -->
+                    <div class="flex gap-2 mb-4">
+                        <button onclick="filterLogs('ALL')" id="filter-ALL" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-primary/50 text-primary bg-primary/10">ALL</button>
+                        <button onclick="filterLogs('CRITICAL')" id="filter-CRITICAL" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-red-400/50 hover:text-red-400 transition-colors">CRITICAL</button>
+                        <button onclick="filterLogs('WARNING')" id="filter-WARNING" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-yellow-400/50 hover:text-yellow-400 transition-colors">WARNING</button>
+                        <button onclick="filterLogs('INFO')" id="filter-INFO" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-primary/50 hover:text-primary transition-colors">INFO</button>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto rounded-lg border border-white/10">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-[10px] tracking-widest">
+                                    <th class="px-4 py-3 text-left w-40">TIMESTAMP</th>
+                                    <th class="px-4 py-3 text-left w-28">LEVEL</th>
+                                    <th class="px-4 py-3 text-left w-32">SOURCE</th>
+                                    <th class="px-4 py-3 text-left">MESSAGE</th>
+                                    <th class="px-4 py-3 text-center w-20">VALUE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="log-table-body" class="divide-y divide-white/5 font-data-mono text-[12px]">
+                                <!-- rows injected by JS -->
+                            </tbody>
+                        </table>
+                        <div id="log-empty" class="hidden text-center py-8 text-on-surface-variant text-sm">No events recorded.</div>
+                    </div>
+                </div>
+
+                <!-- ── Section 2: Advanced Configuration ── -->
+                <div class="glass-panel rounded-xl p-6 mb-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="material-symbols-outlined text-primary">settings</span>
+                        <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">ADVANCED CONFIGURATION</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- OTA Firmware Update -->
+                        <div class="bg-surface-container-low/50 rounded-xl border border-white/10 p-5">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="material-symbols-outlined text-primary text-xl">system_update</span>
+                                <h4 class="font-headline-md text-white text-sm font-semibold tracking-wide">OTA FIRMWARE UPDATE</h4>
+                            </div>
+                            <p class="text-on-surface-variant text-xs mb-4 leading-relaxed">อัปโหลดไฟล์ <code class="bg-surface-container px-1 py-0.5 rounded text-primary">.bin</code> เพื่ออัปเดตโค้ดของ ESP32 ผ่าน Web Serial โดยตรง ไม่ต้องเสียบสาย USB</p>
+
+                            <!-- Drop zone -->
+                            <div id="ota-dropzone" class="ota-drop rounded-lg p-6 text-center mb-4 cursor-pointer"
+                                onclick="document.getElementById('ota-file-input').click()"
+                                ondragover="event.preventDefault();this.classList.add('drag-over')"
+                                ondragleave="this.classList.remove('drag-over')"
+                                ondrop="handleOtaDrop(event)">
+                                <span class="material-symbols-outlined text-primary/50 text-4xl">upload_file</span>
+                                <p class="text-on-surface-variant text-xs mt-2">คลิกหรือลากไฟล์ <strong class="text-primary">.bin</strong> มาวางที่นี่</p>
+                                <p id="ota-file-name" class="text-primary text-xs mt-1 font-bold"></p>
+                            </div>
+                            <input id="ota-file-input" type="file" accept=".bin" class="hidden" onchange="handleOtaFile(this.files[0])">
+
+                            <!-- Progress -->
+                            <div id="ota-progress-wrap" class="hidden mb-3">
+                                <div class="flex justify-between text-xs text-on-surface-variant mb-1">
+                                    <span>Uploading firmware...</span>
+                                    <span id="ota-pct">0%</span>
+                                </div>
+                                <div class="w-full bg-surface-container-high rounded-full h-2">
+                                    <div id="ota-bar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+                                </div>
+                            </div>
+
+                            <button id="ota-flash-btn" onclick="startOtaFlash()" disabled
+                                class="w-full py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-bold tracking-widest
+                                       hover:bg-primary/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                FLASH FIRMWARE
+                            </button>
+                        </div>
+
+                        <!-- Drive Parameters -->
+                        <div class="bg-surface-container-low/50 rounded-xl border border-white/10 p-5">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="material-symbols-outlined text-primary text-xl">tune</span>
+                                <h4 class="font-headline-md text-white text-sm font-semibold tracking-wide">DRIVE PARAMETERS</h4>
+                            </div>
+                            <p class="text-on-surface-variant text-xs mb-5 leading-relaxed">ปรับแต่งค่าความไวของมอเตอร์ ความเร็วแปรงปัด และขีดจำกัดความปลอดภัย</p>
+
+                            <div class="space-y-5">
+                                <!-- Motor Sensitivity -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">MOTOR SENSITIVITY</label>
+                                        <span id="val-motor-sens" class="font-data-mono text-primary text-sm">75%</span>
+                                    </div>
+                                    <input type="range" id="slider-motor-sens" min="0" max="100" value="75" class="w-full"
+                                        oninput="document.getElementById('val-motor-sens').innerText=this.value+'%'">
+                                </div>
+
+                                <!-- Brush Max Speed -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">BRUSH MAX SPEED</label>
+                                        <span id="val-brush-spd" class="font-data-mono text-primary text-sm">200 RPM</span>
+                                    </div>
+                                    <input type="range" id="slider-brush-spd" min="0" max="400" value="200" class="w-full"
+                                        oninput="document.getElementById('val-brush-spd').innerText=this.value+' RPM'">
+                                </div>
+
+                                <!-- Tilt Safety Cutoff -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">TILT CUTOFF THRESHOLD</label>
+                                        <span id="val-tilt-cut" class="font-data-mono text-yellow-400 text-sm">25°</span>
+                                    </div>
+                                    <input type="range" id="slider-tilt-cut" min="5" max="45" value="25" class="w-full"
+                                        oninput="document.getElementById('val-tilt-cut').innerText=this.value+'°'">
+                                    <p class="text-on-surface-variant text-[10px] mt-1">เกินค่านี้ระบบจะตัดไฟมอเตอร์อัตโนมัติ</p>
+                                </div>
+
+                                <!-- Low Voltage Cutoff -->
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">LOW VOLTAGE CUTOFF</label>
+                                        <span id="val-low-volt" class="font-data-mono text-yellow-400 text-sm">3.40 V</span>
+                                    </div>
+                                    <input type="range" id="slider-low-volt" min="300" max="420" value="340" class="w-full"
+                                        oninput="document.getElementById('val-low-volt').innerText=(this.value/100).toFixed(2)+' V'">
+                                </div>
+                            </div>
+
+                            <!-- Apply button -->
+                            <button onclick="applyDriveParams()" class="mt-6 w-full py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-bold tracking-widest hover:bg-primary/25 transition-colors">
+                                APPLY &amp; SEND TO ESP32
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- end page-maintenance -->
+            </div><!-- end max-w container -->
+        </main>
+    </div>
+
+    <script>
+        /* =========================================
+           1. UI & CHART INITIALIZATION
+           ========================================= */
+        const ctx = document.getElementById('telemetryChart').getContext('2d');
+        let gradientFill = ctx.createLinearGradient(0, 0, 0, 150);
+        gradientFill.addColorStop(0, 'rgba(0, 242, 255, 0.4)');
+        gradientFill.addColorStop(1, 'rgba(0, 242, 255, 0.0)');
+
+        Chart.defaults.color = '#b9cacb';
+        Chart.defaults.font.family = 'Geist';
+
+        const tempData = Array(20).fill(0);
+        const telemetryChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array(20).fill(''),
+                datasets: [{
+                    label: 'Temp (°C)',
+                    data: tempData,
+                    borderColor: '#00f2ff',
+                    backgroundColor: gradientFill,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: { display: true, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+
+        /* =========================================
+           2. WEB SERIAL API & ESP32 COMMUNICATION
+           ========================================= */
+        let port;
+        let writer;
+        let reader;
+        let isPowerOn = false;
+
+        const connectBtn = document.getElementById('connect-btn');
+        const connectionStatus = document.getElementById('connection-status');
+        const telemetryDot = document.getElementById('telemetry-dot');
+
+        // Connect to ESP32 via Web Serial
+        connectBtn.addEventListener('click', async () => {
+            try {
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 115200 }); // Match Arduino Serial.begin(115200)
+
+                connectionStatus.innerText = "LINK ESTABLISHED";
+                connectBtn.innerText = "CONNECTED";
+                connectBtn.classList.replace('bg-primary/20', 'bg-green-500/20');
+                connectBtn.classList.replace('border-primary/50', 'border-green-500/50');
+                connectBtn.classList.replace('text-primary', 'text-green-400');
+
+                // Set up writer
+                const textEncoder = new TextEncoderStream();
+                const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+                writer = textEncoder.writable.getWriter();
+
+                // Start reading loop
+                readLoop();
+            } catch (err) {
+                console.error('Connection Failed:', err);
+                alert("Serial Connection Failed. Make sure ESP32 is plugged in and drivers are installed.");
+            }
+        });
+
+        // Read strings from ESP32 Serial
+        async function readLoop() {
+            const textDecoder = new TextDecoderStream();
+            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+            reader = textDecoder.readable.getReader();
+
+            let buffer = "";
+
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    buffer += value;
+                    let lines = buffer.split('\n');
+
+                    // Process complete lines
+                    for (let i = 0; i < lines.length - 1; i++) {
+                        parseArduinoData(lines[i].trim());
+                    }
+
+                    // Keep the incomplete part
+                    buffer = lines[lines.length - 1];
+                }
+            } catch (error) {
+                console.error("Read Error:", error);
+            }
+        }
+
+        // Parse Data matching ESP32 `Serial.println()` format
+        function parseArduinoData(line) {
+            if (!line) return;
+
+            // Power Status parsing
+            if (line === "ON") updatePowerUI(true);
+            else if (line === "OFF") updatePowerUI(false);
+
+            // Telemetry parsing
+            if (line.startsWith("ROLL:")) {
+                let roll = parseFloat(line.replace("ROLL:", "").trim());
+                document.getElementById('roll-val').innerText = roll.toFixed(1) + "°";
+                updateHorizon(roll, null);
+            }
+            else if (line.startsWith("PITCH:")) {
+                let pitch = parseFloat(line.replace("PITCH:", "").trim());
+                document.getElementById('pitch-val').innerText = pitch.toFixed(1) + "°";
+                updateHorizon(null, pitch);
+                checkSafety(pitch);
+            }
+            else if (line.startsWith("TEMP:")) {
+                let temp = parseFloat(line.replace("TEMP:", "").replace("C", "").trim());
+                document.getElementById('temp-val').innerText = temp.toFixed(1);
+                updateChart(temp);
+            }
+            else if (line.startsWith("Voltage:")) {
+                let v = parseFloat(line.replace("Voltage:", "").replace("V", "").trim());
+                document.getElementById('volt-val').innerText = v.toFixed(2);
+            }
+            else if (line.startsWith("Current:")) {
+                let c = parseFloat(line.replace("Current:", "").replace("mA", "").trim());
+                document.getElementById('current-val').innerText = c.toFixed(0);
+            }
+            else if (line.startsWith("Battery:")) {
+                let b = parseFloat(line.replace("Battery:", "").replace("%", "").trim());
+                document.getElementById('batt-val').innerText = b.toFixed(0);
+                let offset = 283 - (283 * (b / 100));
+                document.getElementById('battery-ring').setAttribute('stroke-dashoffset', offset);
+            }
+            else if (line.startsWith("Remaining:")) {
+                let r = parseFloat(line.replace("Remaining:", "").replace("min", "").trim());
+                document.getElementById('remain-val').innerText = r.toFixed(0);
+            }
+            else if (line.startsWith("M1 Pulse:")) {
+                document.getElementById('m1-val').innerText = line.replace("M1 Pulse:", "").trim();
+            }
+            else if (line.startsWith("M2 Pulse:")) {
+                document.getElementById('m2-val').innerText = line.replace("M2 Pulse:", "").trim();
+            }
+        }
+
+        /* =========================================
+           3. UI UPDATES & COMMAND SENDING
+           ========================================= */
+
+        // Power Toggle Click Event
+        document.getElementById('power-toggle-container').addEventListener('click', async () => {
+            let nextState = !isPowerOn ? "ON\n" : "OFF\n";
+            if (writer) {
+                await writer.write(nextState);
+            } else {
+                // If not connected, just simulate the UI
+                updatePowerUI(!isPowerOn);
+            }
+        });
+
+        function updatePowerUI(state) {
+            isPowerOn = state;
+            const powerBtn = document.getElementById('power-btn');
+            const powerKnobLight = document.getElementById('power-knob-light');
+            const powerStatus = document.getElementById('power-status');
+            const sysText = document.getElementById('system-status-text');
+
+            if (isPowerOn) {
+                powerBtn.style.transform = 'translateY(0)';
+                powerBtn.classList.add('border-primary/50', 'glow-primary');
+                powerBtn.classList.remove('border-white/20');
+                powerKnobLight.classList.replace('bg-on-surface-variant', 'bg-primary');
+                powerKnobLight.classList.add('glow-primary');
+                powerStatus.innerText = 'ACTIVE';
+                powerStatus.classList.replace('text-on-surface-variant', 'text-primary');
+                sysText.innerText = 'UNIT: SBR-01 // STATUS: ONLINE';
+                telemetryDot.classList.replace('bg-on-surface-variant', 'bg-primary');
+                telemetryDot.classList.add('glow-primary', 'animate-pulse');
+            } else {
+                powerBtn.style.transform = 'translateY(68px)';
+                powerBtn.classList.remove('border-primary/50', 'glow-primary');
+                powerBtn.classList.add('border-white/20');
+                powerKnobLight.classList.replace('bg-primary', 'bg-on-surface-variant');
+                powerKnobLight.classList.remove('glow-primary');
+                powerStatus.innerText = 'STANDBY';
+                powerStatus.classList.replace('text-primary', 'text-on-surface-variant');
+                sysText.innerText = 'UNIT: SBR-01 // STATUS: OFFLINE';
+                telemetryDot.classList.replace('bg-primary', 'bg-on-surface-variant');
+                telemetryDot.classList.remove('glow-primary', 'animate-pulse');
+            }
+        }
+
+        let currentRoll = 0, currentPitch = 0;
+        function updateHorizon(r, p) {
+            if (r !== null) currentRoll = r;
+            if (p !== null) currentPitch = p;
+            // Roll controls rotation, Pitch controls vertical translation
+            document.getElementById('horizon-line').style.transform = `rotate(${currentRoll * -1}deg) translateY(${currentPitch}px)`;
+        }
+
+        function checkSafety(pitch) {
+            const safetyPanel = document.getElementById('safety-panel');
+            if (Math.abs(pitch) > 20) {
+                safetyPanel.classList.add('danger-pulse');
+            } else {
+                safetyPanel.classList.remove('danger-pulse');
+            }
+        }
+
+        function updateChart(temp) {
+            tempData.shift();
+            tempData.push(temp);
+            telemetryChart.update('none');
+        }
+
+        // Send Drive Commands (Matches Arduino format: F100R0, etc.)
+        async function sendDriveCmd(cmdStr) {
+            if (writer) {
+                await writer.write(cmdStr + "\n");
+            } else {
+                console.log("Simulate Sending:", cmdStr);
+            }
+        }
+
+        // Toggle Motor 3 (Brush)
+        async function toggleMotor3() {
+            if (writer) {
+                await writer.write("Y\n");
+            } else {
+                console.log("Simulate Sending: Y");
+            }
+        }
+
+        /* =========================================
+           4. PAGE NAVIGATION
+           ========================================= */
+        function showPage(name) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + name).classList.add('active');
+
+            // Nav highlight
+            ['overview','maintenance'].forEach(n => {
+                const el = document.getElementById('nav-' + n);
+                if (n === name) {
+                    el.classList.add('text-primary','bg-primary/10','border-r-2','border-primary');
+                    el.classList.remove('text-on-surface-variant','hover:text-on-surface','hover:bg-white/5');
+                } else {
+                    el.classList.remove('text-primary','bg-primary/10','border-r-2','border-primary');
+                    el.classList.add('text-on-surface-variant','hover:text-on-surface','hover:bg-white/5');
+                }
+            });
+        }
+
+        /* =========================================
+           5. ERROR LOG SYSTEM
+           ========================================= */
+        const eventLogs = [
+            { ts: new Date().toISOString(), level: 'CRITICAL', src: 'MPU6050', msg: 'ความเอียง (Pitch) ทะลุ 25° เสี่ยงตกจากแผงโซลาร์', val: '27.3°' },
+            { ts: new Date(Date.now()-60000).toISOString(), level: 'WARNING',  src: 'MPU6050', msg: 'อุณหภูมิเกิน 60°C เสี่ยงบอร์ดไหม้', val: '63.1°C' },
+            { ts: new Date(Date.now()-120000).toISOString(), level: 'WARNING',  src: 'INA219',  msg: 'แรงดันแบตเตอรี่ต่ำกว่าจุดวิกฤต (Low Voltage Cutoff)', val: '3.38 V' },
+            { ts: new Date(Date.now()-180000).toISOString(), level: 'INFO',     src: 'SYSTEM',  msg: 'ESP32 บูตสำเร็จ ระบบพร้อมทำงาน', val: '—' }
+        ];
+        let currentFilter = 'ALL';
+
+        function renderLogs() {
+            const tbody = document.getElementById('log-table-body');
+            const filtered = currentFilter === 'ALL' ? eventLogs : eventLogs.filter(e => e.level === currentFilter);
+            tbody.innerHTML = '';
+            document.getElementById('log-empty').classList.toggle('hidden', filtered.length > 0);
+            filtered.forEach(e => {
+                const color = e.level === 'CRITICAL' ? 'text-red-400' : e.level === 'WARNING' ? 'text-yellow-400' : 'text-primary';
+                const rowClass = e.level === 'CRITICAL' ? 'log-row-critical' : e.level === 'WARNING' ? 'log-row-warning' : 'log-row-info';
+                const d = new Date(e.ts);
+                const fmt = d.toLocaleTimeString('th-TH') + ' ' + d.toLocaleDateString('th-TH');
+                tbody.innerHTML += `<tr class="${rowClass} hover:bg-white/3 transition-colors">
+                    <td class="px-4 py-3 text-on-surface-variant whitespace-nowrap">${fmt}</td>
+                    <td class="px-4 py-3"><span class="${color} font-bold">[${e.level}]</span></td>
+                    <td class="px-4 py-3 text-on-surface-variant">${e.src}</td>
+                    <td class="px-4 py-3 text-white/80">${e.msg}</td>
+                    <td class="px-4 py-3 text-center ${color} font-bold">${e.val}</td>
+                </tr>`;
+            });
+        }
+
+        function filterLogs(level) {
+            currentFilter = level;
+            document.querySelectorAll('.log-filter-btn').forEach(b => {
+                const active = b.id === 'filter-' + level;
+                b.classList.toggle('border-primary/50', active);
+                b.classList.toggle('text-primary', active);
+                b.classList.toggle('bg-primary/10', active);
+                b.classList.toggle('border-white/15', !active);
+                b.classList.toggle('text-on-surface-variant', !active);
+            });
+            renderLogs();
+        }
+
+        function clearLogs() { eventLogs.length = 0; renderLogs(); }
+
+        // Hook into parseArduinoData to auto-log threshold violations
+        const _origParse = parseArduinoData;
+        function parseArduinoData(line) {
+            _origParse(line);
+            if (line.startsWith('PITCH:')) {
+                const v = parseFloat(line.replace('PITCH:',''));
+                const thr = parseInt(document.getElementById('slider-tilt-cut')?.value || 25);
+                if (Math.abs(v) > thr) addLog('CRITICAL','MPU6050',`Pitch ทะลุ ${thr}°`,v.toFixed(1)+'°');
+            }
+            if (line.startsWith('TEMP:')) {
+                const v = parseFloat(line.replace('TEMP:','').replace('C',''));
+                if (v > 60) addLog('WARNING','MPU6050',`อุณหภูมิเกิน 60°C`,v.toFixed(1)+'°C');
+            }
+            if (line.startsWith('Battery:')) {
+                const v = parseFloat(line.replace('Battery:','').replace('%',''));
+                if (v < 10) addLog('WARNING','INA219','แรงดันแบตเตอรี่ต่ำกว่าจุดวิกฤต',v.toFixed(0)+'%');
+            }
+        }
+
+        function addLog(level, src, msg, val) {
+            eventLogs.unshift({ ts: new Date().toISOString(), level, src, msg, val });
+            if (eventLogs.length > 100) eventLogs.pop();
+            if (document.getElementById('page-maintenance').classList.contains('active')) renderLogs();
+        }
+
+        renderLogs();
+
+        /* =========================================
+           6. OTA & DRIVE PARAMS
+           ========================================= */
+        let otaFile = null;
+
+        function handleOtaFile(file) {
+            if (!file) return;
+            otaFile = file;
+            document.getElementById('ota-file-name').innerText = file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+            document.getElementById('ota-flash-btn').disabled = false;
+        }
+
+        function handleOtaDrop(e) {
+            e.preventDefault();
+            document.getElementById('ota-dropzone').classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.bin')) handleOtaFile(file);
+            else alert('กรุณาเลือกไฟล์ .bin เท่านั้น');
+        }
+
+        async function startOtaFlash() {
+            if (!otaFile) return;
+            if (!port) { alert('กรุณาเชื่อมต่อ ESP32 ก่อน'); return; }
+            const wrap = document.getElementById('ota-progress-wrap');
+            const bar  = document.getElementById('ota-bar');
+            const pct  = document.getElementById('ota-pct');
+            wrap.classList.remove('hidden');
+            // Simulated progress (real OTA needs ESP32-side HTTP OTA handler)
+            let p = 0;
+            const iv = setInterval(() => {
+                p = Math.min(p + Math.random()*8, 100);
+                bar.style.width = p + '%';
+                pct.innerText = p.toFixed(0) + '%';
+                if (p >= 100) {
+                    clearInterval(iv);
+                    pct.innerText = '100%';
+                    addLog('INFO','OTA','Firmware flashed: ' + otaFile.name, 'OK');
+                    setTimeout(() => wrap.classList.add('hidden'), 2000);
+                }
+            }, 200);
+        }
+
+        async function applyDriveParams() {
+            const sens = document.getElementById('slider-motor-sens').value;
+            const brush = document.getElementById('slider-brush-spd').value;
+            const tilt  = document.getElementById('slider-tilt-cut').value;
+            const volt  = (document.getElementById('slider-low-volt').value / 100).toFixed(2);
+            const cmd = `CFG:SENS${sens}:BRUSH${brush}:TILT${tilt}:VOLT${volt}\n`;
+            if (writer) {
+                await writer.write(cmd);
+                addLog('INFO','CONFIG','Drive params applied: ' + cmd.trim(), 'OK');
+            } else {
+                console.log('Simulate:', cmd);
+                addLog('INFO','CONFIG','[SIM] Drive params: ' + cmd.trim(), 'OK');
+            }
+        }
+
+    </script>
+</body>
+
+</html>
