@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>HELIOS COMMAND - Camera Vision</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Geist:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script id="tw-cfg">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#00132c", "surface-dim": "#00132c", "surface-container": "#0a203b",
+            "surface-container-low": "#061c36", "surface-container-lowest": "#000e23",
+            "surface-container-high": "#172a46", "surface-container-highest": "#223551",
+            "surface-bright": "#273a56", "surface-variant": "#223551",
+            "on-surface": "#d5e3ff", "on-surface-variant": "#b9cacb",
+            "primary": "#e1fdff", "primary-fixed-dim": "#00dbe7", "primary-container": "#00f2ff",
+            "on-primary": "#00363a", "on-primary-container": "#006a71",
+            "secondary": "#b9c7e4", "secondary-container": "#3c4962",
+            "outline": "#849495", "outline-variant": "#3a494b",
+            "error": "#ffb4ab", "error-container": "#93000a"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: #00132c;
+      background-image: radial-gradient(circle at 50% 0%, rgba(0, 242, 255, .15) 0%, rgba(0, 19, 44, 1) 70%);
+      color: #d5e3ff;
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, .04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, .15);
+      border-left: 1px solid rgba(255, 255, 255, .15)
+    }
+
+    .glow-primary {
+      box-shadow: 0 0 20px rgba(0, 219, 231, .4)
+    }
+
+    .glow-text {
+      text-shadow: 0 0 10px rgba(0, 219, 231, .6)
+    }
+
+    .circuit-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px);
+      background-size: 20px 20px
+    }
+
+    /* Camera feed */
+    #video-stream {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: .5rem;
+      object-fit: contain;
+      background: #000;
+      min-height: 240px
+    }
+
+    /* Dust gauge bar */
+    #dust-bar-fill {
+      transition: width .6s ease, background-color .6s ease
+    }
+
+    /* Camera selector buttons */
+    .cam-btn {
+      background: rgba(0, 242, 255, .08);
+      border: 1px solid rgba(0, 242, 255, .25);
+      color: #d5e3ff;
+      transition: all .2s;
+      border-radius: .5rem;
+      padding: .5rem 1.2rem;
+      cursor: pointer;
+      font-family: 'Geist', sans-serif;
+      font-size: .85rem;
+      letter-spacing: .05em
+    }
+
+    .cam-btn:hover {
+      background: rgba(0, 242, 255, .2);
+      box-shadow: 0 0 10px rgba(0, 219, 231, .35);
+      color: #fff
+    }
+
+    .cam-btn.active {
+      background: rgba(0, 242, 255, .22);
+      border-color: #00dbe7;
+      color: #00dbe7;
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(0, 219, 231, .45)
+    }
+
+    .cam-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    /* Status badge */
+    .level-badge {
+      padding: .2rem .7rem;
+      border-radius: 9999px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em
+    }
+
+    /* No-stream overlay */
+    #no-stream {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: .5rem;
+      background: rgba(0, 19, 44, .85);
+      border-radius: .5rem
+    }
+  </style>
+</head>
+
+<body class="flex h-screen overflow-hidden" style="font-family:'Geist',sans-serif">
+
+  <!-- ── Sidebar Nav ──────────────────────────────────────────── -->
+  <nav
+    class="hidden md:flex flex-col h-full w-64 bg-surface/40 backdrop-blur-xl border-r border-white/15 shadow-xl flex-shrink-0 z-20">
+    <div class="p-6 border-b border-white/10">
+      <h1 style="font-family:'Space Grotesk',sans-serif" class="text-xl text-primary tracking-tighter font-bold">
+        SOLAR-BOT 01</h1>
+      <p class="text-xs text-on-surface-variant mt-1">Vigilant System</p>
+    </div>
+    <div class="flex-1 py-6 flex flex-col gap-2 px-4">
+      <!-- Camera Vision is the only page here; Overview = the main dashboard -->
+      <a href="/camera"
+        class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-primary/10 border-r-2 border-primary transition-colors">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">videocam</span>
+        <span>Camera Vision</span>
+      </a>
+      <!-- Divider -->
+      <div class="mt-auto pt-4 border-t border-white/10">
+        <a href="/"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors text-sm">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+          <span>Back to Dashboard</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main Content ─────────────────────────────────────────── -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen">
+
+    <!-- Header -->
+    <header
+      class="flex justify-between items-center w-full px-8 h-16 bg-surface-dim/30 backdrop-blur-md border-b border-white/10 z-10 flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <h2 style="font-family:'Space Grotesk',sans-serif" class="text-xl text-primary font-bold tracking-tight">HELIOS
+          COMMAND</h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="stream-status-badge"
+          class="level-badge bg-yellow-500/15 text-yellow-400 border border-yellow-500/30">CONNECTING…</span>
+        <span id="hdr-cam-label" class="font-mono text-xs text-on-surface-variant">CAM: {{ current_index }}</span>
+      </div>
+    </header>
+
+    <!-- Body -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 circuit-pattern">
+      <div class="max-w-[1440px] mx-auto flex flex-col gap-6">
+
+        <!-- Page Title -->
+        <div class="flex justify-between items-end">
+          <div>
+            <h3 style="font-family:'Space Grotesk',sans-serif" class="text-2xl text-white glow-text font-bold">Camera
+              Vision</h3>
+            <p class="text-xs text-on-surface-variant mt-1 tracking-widest font-mono">UNIT: SBR-01 // DUST ANALYSIS LIVE
+            </p>
+          </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <!-- ── Video Feed Panel ─────────────────── -->
+          <div class="lg:col-span-8 glass-panel rounded-xl p-4 flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-on-surface-variant tracking-widest font-mono">LIVE FEED</span>
+              <div class="flex items-center gap-2">
+                <span id="live-dot" class="w-2 h-2 rounded-full bg-on-surface-variant"></span>
+                <span id="live-label" class="text-xs text-on-surface-variant font-mono">OFFLINE</span>
+              </div>
+            </div>
+
+            <!-- Video with no-stream overlay -->
+            <div class="relative rounded-lg overflow-hidden bg-black" style="min-height:300px">
+              <img id="video-stream" src="/video_feed" alt="Solar Panel Live Feed" onload="onStreamLoad()"
+                onerror="onStreamError()" />
+              <div id="no-stream" class="hidden">
+                <span class="material-symbols-outlined text-on-surface-variant text-5xl">videocam_off</span>
+                <p class="text-on-surface-variant text-sm">Camera unavailable</p>
+                <p class="text-xs text-outline">Try switching to another index</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Side Panel ──────────────────────── -->
+          <div class="lg:col-span-4 flex flex-col gap-4">
+
+            <!-- Camera Switcher -->
+            <div class="glass-panel rounded-xl p-5">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">switch_camera</span>
+                <span class="text-xs text-on-surface-variant tracking-widest font-mono">CAMERA SOURCE</span>
+              </div>
+
+              <!-- Dynamic camera buttons — populated by /list_cameras on load -->
+              <div id="cam-btn-group" class="flex gap-2 mb-3 flex-wrap min-h-[2.5rem]">
+                <!-- filled by JS -->
+                <span id="cam-scan-msg" class="text-xs text-on-surface-variant font-mono animate-pulse">Scanning
+                  cameras…</span>
+              </div>
+
+              <!-- Refresh scan button -->
+              <button onclick="scanCameras()" class="cam-btn w-full mb-4 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined" style="font-size:1rem">refresh</span> Rescan
+              </button>
+
+              <!-- Manual index input -->
+              <div class="flex gap-2">
+                <input id="cam-custom-index" type="number" min="0" max="9" value="0"
+                  class="flex-1 bg-surface-container-low border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-primary/50"
+                  placeholder="Custom index" />
+                <button onclick="switchCamera(parseInt(document.getElementById('cam-custom-index').value))"
+                  class="cam-btn px-3">
+                  <span class="material-symbols-outlined text-sm" style="font-size:1.1rem">play_arrow</span>
+                </button>
+              </div>
+
+              <p id="switch-msg" class="text-xs text-on-surface-variant mt-3 font-mono hidden"></p>
+            </div>
+
+            <!-- Dust Analysis Card -->
+            <div class="glass-panel rounded-xl p-5 flex flex-col gap-4">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">blur_on</span>
+                <span class="text-xs text-on-surface-variant tracking-widest font-mono">DUST ANALYSIS</span>
+              </div>
+
+              <!-- Score big display -->
+              <div class="flex items-end gap-3">
+                <span id="dust-score-big" style="font-family:'Space Grotesk',sans-serif"
+                  class="text-5xl font-bold text-white tracking-tight">—</span>
+                <span class="text-lg text-on-surface-variant mb-1">%</span>
+                <span id="dust-level-badge"
+                  class="level-badge ml-auto bg-primary/10 text-primary border border-primary/30">—</span>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+                <div id="dust-bar-fill" class="h-2 rounded-full" style="width:0%;background:#00dbe7"></div>
+              </div>
+
+              <!-- Interpretation guide -->
+              <div class="grid grid-cols-5 gap-1 text-center mt-1">
+                <div class="text-[9px] text-on-surface-variant font-mono">CLEAN<br /><span
+                    class="text-primary">0–20</span></div>
+                <div class="text-[9px] text-on-surface-variant font-mono">LOW<br /><span
+                    class="text-lime-400">20–40</span></div>
+                <div class="text-[9px] text-on-surface-variant font-mono">MOD<br /><span
+                    class="text-yellow-400">40–60</span></div>
+                <div class="text-[9px] text-on-surface-variant font-mono">HIGH<br /><span
+                    class="text-orange-400">60–80</span></div>
+                <div class="text-[9px] text-on-surface-variant font-mono">CRIT<br /><span
+                    class="text-red-400">80+</span></div>
+              </div>
+            </div>
+
+            <!-- System Info Card -->
+            <div class="glass-panel rounded-xl p-5 flex flex-col gap-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="material-symbols-outlined text-primary text-base">info</span>
+                <span class="text-xs text-on-surface-variant tracking-widest font-mono">SYSTEM INFO</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                <span class="text-on-surface-variant">Active Camera</span>
+                <span id="info-cam" class="text-white text-right">CAM 0</span>
+                <span class="text-on-surface-variant">Stream FPS</span>
+                <span id="info-fps" class="text-white text-right">— fps</span>
+                <span class="text-on-surface-variant">Last Updated</span>
+                <span id="info-ts" class="text-white text-right">—</span>
+              </div>
+              <a href="/"
+                class="mt-2 text-center w-full py-2 rounded-lg border border-white/10 text-on-surface-variant text-xs hover:bg-white/5 transition-colors block tracking-widest">
+                ← BACK TO OVERVIEW
+              </a>
+            </div>
+
+          </div><!-- /side panel -->
+        </div><!-- /grid -->
+      </div>
+    </main>
+  </div><!-- /main content -->
+
+  <script>
+    /* ════════════════════════════════════════════════════
+       Camera Vision — Frontend Logic
+       ════════════════════════════════════════════════════ */
+
+    let activeCamIndex = {{ current_index }};
+    let fpsCounter = 0, lastFpsTime = Date.now();
+
+    // ── Stream health tracking ──────────────────────────
+    const streamImg = document.getElementById('video-stream');
+    const noStream = document.getElementById('no-stream');
+    const liveDot = document.getElementById('live-dot');
+    const liveLabel = document.getElementById('live-label');
+    const hdrBadge = document.getElementById('stream-status-badge');
+
+    function onStreamLoad() {
+      // Image src connected — stream is live
+      noStream.classList.add('hidden');
+      streamImg.style.display = 'block';
+      liveDot.classList.replace('bg-on-surface-variant', 'bg-primary');
+      liveDot.classList.add('animate-pulse');
+      liveLabel.textContent = 'LIVE';
+      liveLabel.classList.replace('text-on-surface-variant', 'text-primary');
+      hdrBadge.textContent = 'STREAMING';
+      hdrBadge.className = 'level-badge bg-primary/15 text-primary border border-primary/30';
+
+      // Count frames for FPS estimate
+      fpsCounter++;
+      const now = Date.now();
+      if (now - lastFpsTime >= 1000) {
+        document.getElementById('info-fps').textContent = fpsCounter + ' fps';
+        fpsCounter = 0;
+        lastFpsTime = now;
+      }
+    }
+
+    function onStreamError() {
+      streamImg.style.display = 'none';
+      noStream.classList.remove('hidden');
+      liveDot.classList.replace('bg-primary', 'bg-on-surface-variant');
+      liveDot.classList.remove('animate-pulse');
+      liveLabel.textContent = 'OFFLINE';
+      liveLabel.classList.replace('text-primary', 'text-on-surface-variant');
+      hdrBadge.textContent = 'NO SIGNAL';
+      hdrBadge.className = 'level-badge bg-red-500/15 text-red-400 border border-red-500/30';
+    }
+
+    // ── Camera Scan & Switcher ──────────────────────────
+    async function scanCameras() {
+      const group = document.getElementById('cam-btn-group');
+      const scanMsg = document.getElementById('cam-scan-msg');
+      // Show scanning state
+      group.innerHTML = '<span id="cam-scan-msg" class="text-xs text-on-surface-variant font-mono animate-pulse">Scanning cameras…</span>';
+      try {
+        const res = await fetch('/list_cameras');
+        const data = await res.json();
+        const { cameras, current } = data;
+        activeCamIndex = current;
+        group.innerHTML = '';
+        if (cameras.length === 0) {
+          group.innerHTML = '<span class="text-xs text-red-400 font-mono">No cameras detected. Check permissions.</span>';
+          return;
+        }
+        cameras.forEach(idx => {
+          const btn = document.createElement('button');
+          btn.className = 'cam-btn' + (idx === current ? ' active' : '');
+          btn.id = 'cam-btn-' + idx;
+          btn.textContent = 'CAM ' + idx;
+          btn.onclick = () => switchCamera(idx);
+          group.appendChild(btn);
+        });
+      } catch (e) {
+        group.innerHTML = '<span class="text-xs text-red-400 font-mono">Flask not reachable</span>';
+      }
+    }
+
+    async function switchCamera(index) {
+      if (isNaN(index) || index < 0) return;
+
+      const msg = document.getElementById('switch-msg');
+      msg.textContent = `Switching to CAM ${index}…`;
+      msg.classList.remove('hidden', 'text-red-400', 'text-primary');
+      msg.classList.add('text-on-surface-variant');
+
+      // Disable buttons during switch
+      document.querySelectorAll('.cam-btn').forEach(b => b.disabled = true);
+
+      try {
+        const res = await fetch('/switch_camera', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ index })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          activeCamIndex = index;
+
+          // Update active button style
+          document.querySelectorAll('.cam-btn[id^="cam-btn-"]').forEach(b => b.classList.remove('active'));
+          const activeBtn = document.getElementById('cam-btn-' + index);
+          if (activeBtn) activeBtn.classList.add('active');
+
+          // Update labels
+          document.getElementById('hdr-cam-label').textContent = `CAM: ${index}`;
+          document.getElementById('info-cam').textContent = `CAM ${index}`;
+
+          // Force stream reload
+          streamImg.src = '/video_feed?' + Date.now();
+
+          msg.textContent = `✓ Switched to CAM ${index}`;
+          msg.classList.replace('text-on-surface-variant', 'text-primary');
+        } else {
+          msg.textContent = `✗ ${data.error || 'Camera not available'}`;
+          msg.classList.replace('text-on-surface-variant', 'text-red-400');
+        }
+      } catch (e) {
+        msg.textContent = '✗ Network error — is Flask running?';
+        msg.classList.replace('text-on-surface-variant', 'text-red-400');
+      }
+
+      document.querySelectorAll('.cam-btn').forEach(b => b.disabled = false);
+    }
+
+    // ── Dust Status Polling ─────────────────────────────
+    const LEVEL_COLOURS = {
+      CLEAN: { bar: '#00dbe7', badge: 'bg-primary/10 text-primary border-primary/30' },
+      LOW: { bar: '#aaff00', badge: 'bg-lime-500/10 text-lime-400 border-lime-500/30' },
+      MODERATE: { bar: '#ffcc00', badge: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
+      HIGH: { bar: '#ff8800', badge: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
+      CRITICAL: { bar: '#ff4444', badge: 'bg-red-500/10 text-red-400 border-red-500/30' },
+    };
+
+    async function pollDustStatus() {
+      try {
+        const res = await fetch('/dust_status');
+        const data = await res.json();
+
+        const { score, level } = data;
+        const colours = LEVEL_COLOURS[level] || LEVEL_COLOURS.CLEAN;
+
+        // Big score
+        document.getElementById('dust-score-big').textContent = score.toFixed(1);
+
+        // Badge
+        const badge = document.getElementById('dust-level-badge');
+        badge.textContent = level;
+        badge.className = 'level-badge ' + colours.badge;
+
+        // Bar
+        const bar = document.getElementById('dust-bar-fill');
+        bar.style.width = score + '%';
+        bar.style.background = colours.bar;
+
+        // Timestamp
+        document.getElementById('info-ts').textContent = new Date().toLocaleTimeString('th-TH');
+      } catch (_) {
+        // Flask not reachable — silently skip
+      }
+    }
+
+    // Poll dust status every 2 seconds
+    pollDustStatus();
+    setInterval(pollDustStatus, 2000);
+
+    // Auto-scan cameras on load
+    scanCameras();
+  </script>
+</body>
+
+</html>

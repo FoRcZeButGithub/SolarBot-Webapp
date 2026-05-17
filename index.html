@@ -128,26 +128,6 @@
             }
         }
 
-        /* Page switching */
-        .page { display: none; }
-        .page.active { display: flex; flex-direction: column; }
-
-        /* Log table rows */
-        .log-row-critical { border-left: 3px solid #ff4444; }
-        .log-row-warning  { border-left: 3px solid #ffaa00; }
-        .log-row-info     { border-left: 3px solid #00dbe7; }
-
-        /* Slider thumb */
-        input[type=range] { -webkit-appearance: none; appearance: none; height: 4px;
-            background: rgba(0,219,231,0.25); border-radius: 4px; outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px;
-            border-radius: 50%; background: #00dbe7; cursor: pointer;
-            box-shadow: 0 0 8px rgba(0,219,231,0.7); }
-
-        /* OTA drop zone */
-        .ota-drop { border: 2px dashed rgba(0,219,231,0.35); transition: all .2s; }
-        .ota-drop.drag-over { border-color: #00dbe7; background: rgba(0,219,231,0.08); }
-
         /* Custom Button Styling for Controller */
         .ctrl-btn {
             background: rgba(0, 242, 255, 0.1);
@@ -170,6 +150,60 @@
         .ctrl-btn:active {
             transform: scale(0.95);
         }
+
+        /* Page switching */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Log table rows */
+        .log-row-critical {
+            border-left: 3px solid #ff4444;
+        }
+
+        .log-row-warning {
+            border-left: 3px solid #ffaa00;
+        }
+
+        .log-row-info {
+            border-left: 3px solid #00dbe7;
+        }
+
+        /* Slider thumb */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: rgba(0, 219, 231, 0.25);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00dbe7;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0, 219, 231, 0.7);
+        }
+
+        /* OTA drop zone */
+        .ota-drop {
+            border: 2px dashed rgba(0, 219, 231, 0.35);
+            transition: all .2s;
+        }
+
+        .ota-drop.drag-over {
+            border-color: #00dbe7;
+            background: rgba(0, 219, 231, 0.08);
+        }
     </style>
 </head>
 
@@ -181,15 +215,25 @@
             <p class="font-body-md text-body-md text-on-surface-variant mt-1">Vigilant System</p>
         </div>
         <div class="flex-1 py-6 flex flex-col gap-2 px-4">
-            <a id="nav-overview" class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-primary/10 border-r-2 border-primary transition-transform duration-200"
+            <a id="nav-overview"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-primary/10 border-r-2 border-primary transition-transform duration-200"
                 href="#" onclick="showPage('overview');return false;">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
                 <span class="font-body-md text-body-md">Overview</span>
             </a>
-            <a id="nav-maintenance" class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors duration-200"
+            <a id="nav-maintenance"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors duration-200"
                 href="#" onclick="showPage('maintenance');return false;">
                 <span class="material-symbols-outlined">build</span>
                 <span class="font-body-md text-body-md">Maintenance</span>
+            </a>
+            <a id="nav-camera"
+                class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors duration-200"
+                href="/camera">
+                <span class="material-symbols-outlined">videocam</span>
+                <span class="font-body-md text-body-md">Camera Vision</span>
+                <span
+                    class="ml-auto text-[9px] font-mono text-primary/50 border border-primary/20 rounded px-1">FLASK</span>
             </a>
         </div>
     </nav>
@@ -215,244 +259,255 @@
         <main class="flex-1 overflow-y-auto p-4 md:p-8 circuit-pattern">
             <div class="max-w-[1440px] mx-auto h-full flex flex-col">
 
-            <!-- ===== OVERVIEW PAGE ===== -->
-            <div id="page-overview" class="page active">
-                <div class="flex justify-between items-end mb-6">
-                    <div>
-                        <h3 class="font-headline-lg text-headline-lg text-white glow-text">System Overview</h3>
-                        <p class="font-data-mono text-data-mono text-on-surface-variant mt-2 tracking-widest"
-                            id="system-status-text">UNIT: SBR-01 // STATUS: OFFLINE</p>
-                    </div>
-                    <div
-                        class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full border border-primary/20">
-                        <span class="w-2 h-2 rounded-full bg-on-surface-variant" id="telemetry-dot"></span>
-                        <span class="font-data-mono text-data-mono text-primary" id="connection-status">WAITING
-                            DATA...</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-full auto-rows-min md:auto-rows-fr">
-
-                    <div
-                        class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col justify-between items-center relative overflow-hidden group">
-                        <div class="w-full flex justify-between items-start mb-8">
-                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">MAIN
-                                POWER</span>
-                            <span class="material-symbols-outlined text-primary/50">power_settings_new</span>
+                <!-- ===== OVERVIEW PAGE ===== -->
+                <div id="page-overview" class="page active">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h3 class="font-headline-lg text-headline-lg text-white glow-text">System Overview</h3>
+                            <p class="font-data-mono text-data-mono text-on-surface-variant mt-2 tracking-widest"
+                                id="system-status-text">UNIT: SBR-01 // STATUS: OFFLINE</p>
                         </div>
-                        <div class="relative w-32 h-48 flex items-center justify-center" id="power-toggle-container"
-                            style="cursor: pointer;">
-                            <div
-                                class="absolute w-16 h-32 bg-surface-container-lowest rounded-full border border-white/10 shadow-inner flex flex-col justify-between py-2 items-center">
-                                <span class="font-data-mono text-[10px] text-primary/50">ON</span>
-                                <span class="font-data-mono text-[10px] text-on-surface-variant/30">OFF</span>
-                            </div>
-                            <div id="power-btn"
-                                class="absolute top-2 w-20 h-14 bg-surface-bright rounded-full border border-white/20 flex items-center justify-center transition-all duration-300 shadow-lg z-10 transform translate-y-[68px]">
-                                <div id="power-knob-light" class="w-12 h-2 bg-on-surface-variant rounded-full"></div>
-                            </div>
-                        </div>
-                        <div class="w-full text-center mt-8">
-                            <p id="power-status"
-                                class="font-headline-md text-headline-md text-on-surface-variant transition-colors">
-                                STANDBY</p>
+                        <div
+                            class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full border border-primary/20">
+                            <span class="w-2 h-2 rounded-full bg-on-surface-variant" id="telemetry-dot"></span>
+                            <span class="font-data-mono text-data-mono text-primary" id="connection-status">WAITING
+                                DATA...</span>
                         </div>
                     </div>
 
-                    <div class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col relative overflow-hidden">
-                        <div class="w-full flex justify-between items-start mb-4">
-                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">CORE
-                                ENERGY (INA219)</span>
-                            <span class="material-symbols-outlined text-primary">battery_5_bar</span>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center justify-center relative">
-                            <div class="relative w-40 h-40 flex items-center justify-center">
-                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" fill="none" r="45" stroke="#223551" stroke-width="6">
-                                    </circle>
-                                    <circle id="battery-ring"
-                                        class="drop-shadow-[0_0_8px_rgba(0,242,255,0.8)] transition-all duration-500"
-                                        cx="50" cy="50" fill="none" r="45" stroke="#00f2ff" stroke-dasharray="283"
-                                        stroke-dashoffset="283" stroke-linecap="round" stroke-width="6"></circle>
-                                </svg>
-                                <div class="absolute flex flex-col items-center justify-center">
-                                    <span class="font-display-lg text-4xl text-white font-bold tracking-tighter"><span
-                                            id="batt-val">0</span><span class="text-xl text-primary">%</span></span>
-                                    <span class="font-data-mono text-[10px] text-primary mt-1"><span
-                                            id="volt-val">0.00</span> V</span>
-                                </div>
-                            </div>
-                            <div class="w-full grid grid-cols-2 gap-4 mt-6">
-                                <div class="bg-surface-container-low/50 rounded p-2 text-center border border-white/5">
-                                    <span
-                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">CURRENT</span>
-                                    <span class="font-data-mono text-data-mono text-white"><span
-                                            id="current-val">0</span> mA</span>
-                                </div>
-                                <div class="bg-surface-container-low/50 rounded p-2 text-center border border-white/5">
-                                    <span
-                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">REMAINING</span>
-                                    <span class="font-data-mono text-data-mono text-primary"><span
-                                            id="remain-val">0</span> min</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-full auto-rows-min md:auto-rows-fr">
 
-                    <div id="safety-panel"
-                        class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col transition-all duration-300">
-                        <div class="w-full flex justify-between items-start mb-4">
-                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">GYRO
-                                METRICS (MPU6050)</span>
-                            <span class="material-symbols-outlined text-primary/70" id="gyro-icon">explore</span>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center justify-center">
-                            <div
-                                class="relative w-40 h-40 rounded-full border-2 border-surface-container-high flex items-center justify-center overflow-hidden mb-4">
-                                <div id="horizon-line"
-                                    class="absolute w-full h-full transform transition-transform duration-100 rotate-[0deg]">
-                                    <div class="w-full h-1/2 bg-primary/10 border-b border-primary glow-primary"
-                                        id="horizon-sky"></div>
-                                    <div class="w-full h-1/2 bg-surface-container-lowest"></div>
-                                </div>
+                        <div
+                            class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col justify-between items-center relative overflow-hidden group">
+                            <div class="w-full flex justify-between items-start mb-8">
+                                <span
+                                    class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">MAIN
+                                    POWER</span>
+                                <span class="material-symbols-outlined text-primary/50">power_settings_new</span>
+                            </div>
+                            <div class="relative w-32 h-48 flex items-center justify-center" id="power-toggle-container"
+                                style="cursor: pointer;">
                                 <div
-                                    class="absolute w-8 h-8 border border-white/30 rounded-full flex items-center justify-center">
-                                    <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                    class="absolute w-16 h-32 bg-surface-container-lowest rounded-full border border-white/10 shadow-inner flex flex-col justify-between py-2 items-center">
+                                    <span class="font-data-mono text-[10px] text-primary/50">ON</span>
+                                    <span class="font-data-mono text-[10px] text-on-surface-variant/30">OFF</span>
+                                </div>
+                                <div id="power-btn"
+                                    class="absolute top-2 w-20 h-14 bg-surface-bright rounded-full border border-white/20 flex items-center justify-center transition-all duration-300 shadow-lg z-10 transform translate-y-[68px]">
+                                    <div id="power-knob-light" class="w-12 h-2 bg-on-surface-variant rounded-full">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="w-full flex justify-around items-center">
-                                <div class="text-center">
-                                    <span
-                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">PITCH</span>
-                                    <span class="font-data-mono text-body-lg text-white" id="pitch-val">0.0°</span>
-                                </div>
-                                <div class="w-px h-8 bg-white/10"></div>
-                                <div class="text-center">
-                                    <span
-                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">ROLL</span>
-                                    <span class="font-data-mono text-body-lg text-white" id="roll-val">0.0°</span>
-                                </div>
-                                <div class="w-px h-8 bg-white/10"></div>
-                                <div class="text-center">
-                                    <span
-                                        class="font-label-caps text-[10px] text-on-surface-variant block mb-1">TEMP</span>
-                                    <span class="font-data-mono text-body-lg text-primary"><span
-                                            id="temp-val">0.0</span>°C</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel rounded-xl md:col-span-12 p-6 flex flex-col">
-                        <div class="w-full flex justify-between items-start mb-6">
-                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">DRIVE
-                                SYSTEM & ODOMETRY</span>
-                            <div class="flex gap-2">
-                                <span class="material-symbols-outlined text-primary/70">gamepad</span>
+                            <div class="w-full text-center mt-8">
+                                <p id="power-status"
+                                    class="font-headline-md text-headline-md text-on-surface-variant transition-colors">
+                                    STANDBY</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1">
-                            <div class="md:col-span-4 grid grid-rows-2 gap-4">
-                                <div
-                                    class="flex flex-col justify-center border-l-2 border-primary/30 pl-4 h-full bg-surface-container-lowest/50 rounded-r-lg">
-                                    <span class="font-label-caps text-[12px] text-on-surface-variant mb-2">M1 PULSE
-                                        (Revs)</span>
-                                    <span class="font-display-lg text-3xl text-white font-bold tracking-tight"
-                                        id="m1-val">0.00</span>
+                        <div class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col relative overflow-hidden">
+                            <div class="w-full flex justify-between items-start mb-4">
+                                <span
+                                    class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">CORE
+                                    ENERGY (INA219)</span>
+                                <span class="material-symbols-outlined text-primary">battery_5_bar</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center justify-center relative">
+                                <div class="relative w-40 h-40 flex items-center justify-center">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" fill="none" r="45" stroke="#223551" stroke-width="6">
+                                        </circle>
+                                        <circle id="battery-ring"
+                                            class="drop-shadow-[0_0_8px_rgba(0,242,255,0.8)] transition-all duration-500"
+                                            cx="50" cy="50" fill="none" r="45" stroke="#00f2ff" stroke-dasharray="283"
+                                            stroke-dashoffset="283" stroke-linecap="round" stroke-width="6"></circle>
+                                    </svg>
+                                    <div class="absolute flex flex-col items-center justify-center">
+                                        <span
+                                            class="font-display-lg text-4xl text-white font-bold tracking-tighter"><span
+                                                id="batt-val">0</span><span class="text-xl text-primary">%</span></span>
+                                        <span class="font-data-mono text-[10px] text-primary mt-1"><span
+                                                id="volt-val">0.00</span> V</span>
+                                    </div>
                                 </div>
+                                <div class="w-full grid grid-cols-2 gap-4 mt-6">
+                                    <div
+                                        class="bg-surface-container-low/50 rounded p-2 text-center border border-white/5">
+                                        <span
+                                            class="font-label-caps text-[10px] text-on-surface-variant block mb-1">CURRENT</span>
+                                        <span class="font-data-mono text-data-mono text-white"><span
+                                                id="current-val">0</span> mA</span>
+                                    </div>
+                                    <div
+                                        class="bg-surface-container-low/50 rounded p-2 text-center border border-white/5">
+                                        <span
+                                            class="font-label-caps text-[10px] text-on-surface-variant block mb-1">REMAINING</span>
+                                        <span class="font-data-mono text-data-mono text-primary"><span
+                                                id="remain-val">0</span> min</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="safety-panel"
+                            class="glass-panel rounded-xl md:col-span-4 p-6 flex flex-col transition-all duration-300">
+                            <div class="w-full flex justify-between items-start mb-4">
+                                <span
+                                    class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">GYRO
+                                    METRICS (MPU6050)</span>
+                                <span class="material-symbols-outlined text-primary/70" id="gyro-icon">explore</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center justify-center">
                                 <div
-                                    class="flex flex-col justify-center border-l-2 border-primary/30 pl-4 h-full bg-surface-container-lowest/50 rounded-r-lg">
-                                    <span class="font-label-caps text-[12px] text-on-surface-variant mb-2">M2 PULSE
-                                        (Revs)</span>
-                                    <span class="font-display-lg text-3xl text-white font-bold tracking-tight"
-                                        id="m2-val">0.00</span>
+                                    class="relative w-40 h-40 rounded-full border-2 border-surface-container-high flex items-center justify-center overflow-hidden mb-4">
+                                    <div id="horizon-line"
+                                        class="absolute w-full h-full transform transition-transform duration-100 rotate-[0deg]">
+                                        <div class="w-full h-1/2 bg-primary/10 border-b border-primary glow-primary"
+                                            id="horizon-sky"></div>
+                                        <div class="w-full h-1/2 bg-surface-container-lowest"></div>
+                                    </div>
+                                    <div
+                                        class="absolute w-8 h-8 border border-white/30 rounded-full flex items-center justify-center">
+                                        <div class="w-2 h-2 bg-primary rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="w-full flex justify-around items-center">
+                                    <div class="text-center">
+                                        <span
+                                            class="font-label-caps text-[10px] text-on-surface-variant block mb-1">PITCH</span>
+                                        <span class="font-data-mono text-body-lg text-white" id="pitch-val">0.0°</span>
+                                    </div>
+                                    <div class="w-px h-8 bg-white/10"></div>
+                                    <div class="text-center">
+                                        <span
+                                            class="font-label-caps text-[10px] text-on-surface-variant block mb-1">ROLL</span>
+                                        <span class="font-data-mono text-body-lg text-white" id="roll-val">0.0°</span>
+                                    </div>
+                                    <div class="w-px h-8 bg-white/10"></div>
+                                    <div class="text-center">
+                                        <span
+                                            class="font-label-caps text-[10px] text-on-surface-variant block mb-1">TEMP</span>
+                                        <span class="font-data-mono text-body-lg text-primary"><span
+                                                id="temp-val">0.0</span>°C</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-xl md:col-span-12 p-6 flex flex-col">
+                            <div class="w-full flex justify-between items-start mb-6">
+                                <span
+                                    class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">DRIVE
+                                    SYSTEM & ODOMETRY</span>
+                                <div class="flex gap-2">
+                                    <span class="material-symbols-outlined text-primary/70">gamepad</span>
                                 </div>
                             </div>
 
-                            <div
-                                class="md:col-span-4 flex flex-col items-center justify-center border-x border-white/10 px-4">
-                                <span class="font-label-caps text-[10px] text-on-surface-variant mb-4">MANUAL
-                                    OVERRIDE</span>
-                                <div class="grid grid-cols-3 gap-2 w-full max-w-[200px] mb-4">
-                                    <div></div>
-                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F100R0')"
-                                        onmouseup="sendDriveCmd('F0R0')"><span
-                                            class="material-symbols-outlined">keyboard_arrow_up</span></button>
-                                    <div></div>
-                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F0L100')"
-                                        onmouseup="sendDriveCmd('F0R0')"><span
-                                            class="material-symbols-outlined">keyboard_arrow_left</span></button>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1">
+                                <div class="md:col-span-4 grid grid-rows-2 gap-4">
+                                    <div
+                                        class="flex flex-col justify-center border-l-2 border-primary/30 pl-4 h-full bg-surface-container-lowest/50 rounded-r-lg">
+                                        <span class="font-label-caps text-[12px] text-on-surface-variant mb-2">M1 PULSE
+                                            (Revs)</span>
+                                        <span class="font-display-lg text-3xl text-white font-bold tracking-tight"
+                                            id="m1-val">0.00</span>
+                                    </div>
+                                    <div
+                                        class="flex flex-col justify-center border-l-2 border-primary/30 pl-4 h-full bg-surface-container-lowest/50 rounded-r-lg">
+                                        <span class="font-label-caps text-[12px] text-on-surface-variant mb-2">M2 PULSE
+                                            (Revs)</span>
+                                        <span class="font-display-lg text-3xl text-white font-bold tracking-tight"
+                                            id="m2-val">0.00</span>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="md:col-span-4 flex flex-col items-center justify-center border-x border-white/10 px-4">
+                                    <span class="font-label-caps text-[10px] text-on-surface-variant mb-4">MANUAL
+                                        OVERRIDE</span>
+                                    <div class="grid grid-cols-3 gap-2 w-full max-w-[200px] mb-4">
+                                        <div></div>
+                                        <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F100R0')"
+                                            onmouseup="sendDriveCmd('F0R0')"><span
+                                                class="material-symbols-outlined">keyboard_arrow_up</span></button>
+                                        <div></div>
+                                        <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F0L100')"
+                                            onmouseup="sendDriveCmd('F0R0')"><span
+                                                class="material-symbols-outlined">keyboard_arrow_left</span></button>
+                                        <button
+                                            class="ctrl-btn py-3 bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/30"
+                                            onclick="sendDriveCmd('F0R0')"><span
+                                                class="material-symbols-outlined">stop_circle</span></button>
+                                        <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F0R100')"
+                                            onmouseup="sendDriveCmd('F0R0')"><span
+                                                class="material-symbols-outlined">keyboard_arrow_right</span></button>
+                                        <div></div>
+                                        <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('B100R0')"
+                                            onmouseup="sendDriveCmd('F0R0')"><span
+                                                class="material-symbols-outlined">keyboard_arrow_down</span></button>
+                                        <div></div>
+                                    </div>
                                     <button
-                                        class="ctrl-btn py-3 bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/30"
-                                        onclick="sendDriveCmd('F0R0')"><span
-                                            class="material-symbols-outlined">stop_circle</span></button>
-                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('F0R100')"
-                                        onmouseup="sendDriveCmd('F0R0')"><span
-                                            class="material-symbols-outlined">keyboard_arrow_right</span></button>
-                                    <div></div>
-                                    <button class="ctrl-btn py-3" onmousedown="sendDriveCmd('B100R0')"
-                                        onmouseup="sendDriveCmd('F0R0')"><span
-                                            class="material-symbols-outlined">keyboard_arrow_down</span></button>
-                                    <div></div>
+                                        class="ctrl-btn w-full max-w-[200px] py-2 border-primary text-primary font-bold text-sm tracking-widest"
+                                        onclick="toggleMotor3()">
+                                        TOGGLE BRUSH (M3)
+                                    </button>
                                 </div>
-                                <button
-                                    class="ctrl-btn w-full max-w-[200px] py-2 border-primary text-primary font-bold text-sm tracking-widest"
-                                    onclick="toggleMotor3()">
-                                    TOGGLE BRUSH (M3)
-                                </button>
-                            </div>
 
-                            <div class="md:col-span-4 h-full min-h-[150px] relative w-full flex flex-col">
-                                <span class="font-label-caps text-[10px] text-on-surface-variant mb-2">TEMPERATURE
-                                    HISTORY (°C)</span>
-                                <div class="flex-1 relative">
-                                    <canvas id="telemetryChart"></canvas>
+                                <div class="md:col-span-4 h-full min-h-[150px] relative w-full flex flex-col">
+                                    <span class="font-label-caps text-[10px] text-on-surface-variant mb-2">TEMPERATURE
+                                        HISTORY (°C)</span>
+                                    <div class="flex-1 relative">
+                                        <canvas id="telemetryChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                </div>
-            </div><!-- end grid -->
+                    </div>
+                </div><!-- end grid -->
             </div><!-- end page-overview -->
 
             <!-- ===== MAINTENANCE PAGE ===== -->
             <div id="page-maintenance" class="page">
 
-                <!-- Header -->
                 <div class="flex justify-between items-end mb-6">
                     <div>
                         <h3 class="font-headline-lg text-headline-lg text-white glow-text">Maintenance</h3>
-                        <p class="font-data-mono text-data-mono text-on-surface-variant mt-2 tracking-widest">UNIT: SBR-01 // DIAGNOSTICS &amp; CONFIG</p>
+                        <p class="font-data-mono text-data-mono text-on-surface-variant mt-2 tracking-widest">UNIT:
+                            SBR-01 // DIAGNOSTICS &amp; CONFIG</p>
                     </div>
                 </div>
 
-                <!-- ── Section 1: Error Logs & Telemetry History ── -->
+                <!-- Error Logs -->
                 <div class="glass-panel rounded-xl p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex items-center gap-3">
                             <span class="material-symbols-outlined text-red-400">error</span>
-                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">ERROR LOGS &amp; TELEMETRY HISTORY</span>
+                            <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">ERROR
+                                LOGS &amp; TELEMETRY HISTORY</span>
                         </div>
-                        <button onclick="clearLogs()" class="flex items-center gap-1 text-xs text-on-surface-variant border border-white/10 rounded px-3 py-1 hover:bg-white/5 transition-colors">
+                        <button onclick="clearLogs()"
+                            class="flex items-center gap-1 text-xs text-on-surface-variant border border-white/10 rounded px-3 py-1 hover:bg-white/5 transition-colors">
                             <span class="material-symbols-outlined text-sm">delete_sweep</span> CLEAR
                         </button>
                     </div>
-
-                    <!-- Filter tabs -->
                     <div class="flex gap-2 mb-4">
-                        <button onclick="filterLogs('ALL')" id="filter-ALL" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-primary/50 text-primary bg-primary/10">ALL</button>
-                        <button onclick="filterLogs('CRITICAL')" id="filter-CRITICAL" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-red-400/50 hover:text-red-400 transition-colors">CRITICAL</button>
-                        <button onclick="filterLogs('WARNING')" id="filter-WARNING" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-yellow-400/50 hover:text-yellow-400 transition-colors">WARNING</button>
-                        <button onclick="filterLogs('INFO')" id="filter-INFO" class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-primary/50 hover:text-primary transition-colors">INFO</button>
+                        <button onclick="filterLogs('ALL')" id="filter-ALL"
+                            class="log-filter-btn text-xs px-3 py-1 rounded-full border border-primary/50 text-primary bg-primary/10">ALL</button>
+                        <button onclick="filterLogs('CRITICAL')" id="filter-CRITICAL"
+                            class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-red-400/50 hover:text-red-400 transition-colors">CRITICAL</button>
+                        <button onclick="filterLogs('WARNING')" id="filter-WARNING"
+                            class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-yellow-400/50 hover:text-yellow-400 transition-colors">WARNING</button>
+                        <button onclick="filterLogs('INFO')" id="filter-INFO"
+                            class="log-filter-btn text-xs px-3 py-1 rounded-full border border-white/15 text-on-surface-variant hover:border-primary/50 hover:text-primary transition-colors">INFO</button>
                     </div>
-
-                    <!-- Table -->
                     <div class="overflow-x-auto rounded-lg border border-white/10">
                         <table class="w-full text-sm">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-[10px] tracking-widest">
+                                <tr
+                                    class="bg-surface-container-low text-on-surface-variant font-label-caps text-[10px] tracking-widest">
                                     <th class="px-4 py-3 text-left w-40">TIMESTAMP</th>
                                     <th class="px-4 py-3 text-left w-28">LEVEL</th>
                                     <th class="px-4 py-3 text-left w-32">SOURCE</th>
@@ -461,56 +516,54 @@
                                 </tr>
                             </thead>
                             <tbody id="log-table-body" class="divide-y divide-white/5 font-data-mono text-[12px]">
-                                <!-- rows injected by JS -->
                             </tbody>
                         </table>
-                        <div id="log-empty" class="hidden text-center py-8 text-on-surface-variant text-sm">No events recorded.</div>
+                        <div id="log-empty" class="hidden text-center py-8 text-on-surface-variant text-sm">No events
+                            recorded.</div>
                     </div>
                 </div>
 
-                <!-- ── Section 2: Advanced Configuration ── -->
+                <!-- Advanced Config -->
                 <div class="glass-panel rounded-xl p-6 mb-6">
                     <div class="flex items-center gap-3 mb-6">
                         <span class="material-symbols-outlined text-primary">settings</span>
-                        <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">ADVANCED CONFIGURATION</span>
+                        <span class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">ADVANCED
+                            CONFIGURATION</span>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <!-- OTA Firmware Update -->
+                        <!-- OTA -->
                         <div class="bg-surface-container-low/50 rounded-xl border border-white/10 p-5">
                             <div class="flex items-center gap-2 mb-4">
                                 <span class="material-symbols-outlined text-primary text-xl">system_update</span>
-                                <h4 class="font-headline-md text-white text-sm font-semibold tracking-wide">OTA FIRMWARE UPDATE</h4>
+                                <h4 class="font-headline-md text-white text-sm font-semibold tracking-wide">OTA FIRMWARE
+                                    UPDATE</h4>
                             </div>
-                            <p class="text-on-surface-variant text-xs mb-4 leading-relaxed">อัปโหลดไฟล์ <code class="bg-surface-container px-1 py-0.5 rounded text-primary">.bin</code> เพื่ออัปเดตโค้ดของ ESP32 ผ่าน Web Serial โดยตรง ไม่ต้องเสียบสาย USB</p>
-
-                            <!-- Drop zone -->
+                            <p class="text-on-surface-variant text-xs mb-4 leading-relaxed">อัปโหลดไฟล์ <code
+                                    class="bg-surface-container px-1 py-0.5 rounded text-primary">.bin</code>
+                                เพื่ออัปเดตโค้ดของ ESP32</p>
                             <div id="ota-dropzone" class="ota-drop rounded-lg p-6 text-center mb-4 cursor-pointer"
                                 onclick="document.getElementById('ota-file-input').click()"
                                 ondragover="event.preventDefault();this.classList.add('drag-over')"
-                                ondragleave="this.classList.remove('drag-over')"
-                                ondrop="handleOtaDrop(event)">
+                                ondragleave="this.classList.remove('drag-over')" ondrop="handleOtaDrop(event)">
                                 <span class="material-symbols-outlined text-primary/50 text-4xl">upload_file</span>
-                                <p class="text-on-surface-variant text-xs mt-2">คลิกหรือลากไฟล์ <strong class="text-primary">.bin</strong> มาวางที่นี่</p>
+                                <p class="text-on-surface-variant text-xs mt-2">คลิกหรือลากไฟล์ <strong
+                                        class="text-primary">.bin</strong> มาวางที่นี่</p>
                                 <p id="ota-file-name" class="text-primary text-xs mt-1 font-bold"></p>
                             </div>
-                            <input id="ota-file-input" type="file" accept=".bin" class="hidden" onchange="handleOtaFile(this.files[0])">
-
-                            <!-- Progress -->
+                            <input id="ota-file-input" type="file" accept=".bin" class="hidden"
+                                onchange="handleOtaFile(this.files[0])">
                             <div id="ota-progress-wrap" class="hidden mb-3">
                                 <div class="flex justify-between text-xs text-on-surface-variant mb-1">
-                                    <span>Uploading firmware...</span>
-                                    <span id="ota-pct">0%</span>
+                                    <span>Uploading firmware...</span><span id="ota-pct">0%</span>
                                 </div>
                                 <div class="w-full bg-surface-container-high rounded-full h-2">
-                                    <div id="ota-bar" class="bg-primary h-2 rounded-full transition-all duration-300" style="width:0%"></div>
+                                    <div id="ota-bar" class="bg-primary h-2 rounded-full transition-all duration-300"
+                                        style="width:0%"></div>
                                 </div>
                             </div>
-
                             <button id="ota-flash-btn" onclick="startOtaFlash()" disabled
-                                class="w-full py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-bold tracking-widest
-                                       hover:bg-primary/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                class="w-full py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-bold tracking-widest hover:bg-primary/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                                 FLASH FIRMWARE
                             </button>
                         </div>
@@ -519,64 +572,73 @@
                         <div class="bg-surface-container-low/50 rounded-xl border border-white/10 p-5">
                             <div class="flex items-center gap-2 mb-4">
                                 <span class="material-symbols-outlined text-primary text-xl">tune</span>
-                                <h4 class="font-headline-md text-white text-sm font-semibold tracking-wide">DRIVE PARAMETERS</h4>
+                                <h4 class="font-headline-md text-white text-sm font-semibold tracking-wide">DRIVE
+                                    PARAMETERS</h4>
                             </div>
-                            <p class="text-on-surface-variant text-xs mb-5 leading-relaxed">ปรับแต่งค่าความไวของมอเตอร์ ความเร็วแปรงปัด และขีดจำกัดความปลอดภัย</p>
-
+                            <p class="text-on-surface-variant text-xs mb-5 leading-relaxed">ปรับแต่งค่าความไวของมอเตอร์
+                                ความเร็วแปรงปัด และขีดจำกัดความปลอดภัย</p>
                             <div class="space-y-5">
-                                <!-- Motor Sensitivity -->
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
-                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">MOTOR SENSITIVITY</label>
+                                        <label
+                                            class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">MOTOR
+                                            SENSITIVITY</label>
                                         <span id="val-motor-sens" class="font-data-mono text-primary text-sm">75%</span>
                                     </div>
-                                    <input type="range" id="slider-motor-sens" min="0" max="100" value="75" class="w-full"
+                                    <input type="range" id="slider-motor-sens" min="0" max="100" value="75"
+                                        class="w-full"
                                         oninput="document.getElementById('val-motor-sens').innerText=this.value+'%'">
                                 </div>
-
-                                <!-- Brush Max Speed -->
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
-                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">BRUSH MAX SPEED</label>
-                                        <span id="val-brush-spd" class="font-data-mono text-primary text-sm">200 RPM</span>
+                                        <label
+                                            class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">BRUSH
+                                            MAX SPEED</label>
+                                        <span id="val-brush-spd" class="font-data-mono text-primary text-sm">200
+                                            RPM</span>
                                     </div>
-                                    <input type="range" id="slider-brush-spd" min="0" max="400" value="200" class="w-full"
+                                    <input type="range" id="slider-brush-spd" min="0" max="400" value="200"
+                                        class="w-full"
                                         oninput="document.getElementById('val-brush-spd').innerText=this.value+' RPM'">
                                 </div>
-
-                                <!-- Tilt Safety Cutoff -->
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
-                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">TILT CUTOFF THRESHOLD</label>
-                                        <span id="val-tilt-cut" class="font-data-mono text-yellow-400 text-sm">25°</span>
+                                        <label
+                                            class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">TILT
+                                            CUTOFF THRESHOLD</label>
+                                        <span id="val-tilt-cut"
+                                            class="font-data-mono text-yellow-400 text-sm">25°</span>
                                     </div>
                                     <input type="range" id="slider-tilt-cut" min="5" max="45" value="25" class="w-full"
                                         oninput="document.getElementById('val-tilt-cut').innerText=this.value+'°'">
-                                    <p class="text-on-surface-variant text-[10px] mt-1">เกินค่านี้ระบบจะตัดไฟมอเตอร์อัตโนมัติ</p>
+                                    <p class="text-on-surface-variant text-[10px] mt-1">
+                                        เกินค่านี้ระบบจะตัดไฟมอเตอร์อัตโนมัติ</p>
                                 </div>
-
-                                <!-- Low Voltage Cutoff -->
                                 <div>
                                     <div class="flex justify-between items-center mb-2">
-                                        <label class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">LOW VOLTAGE CUTOFF</label>
-                                        <span id="val-low-volt" class="font-data-mono text-yellow-400 text-sm">3.40 V</span>
+                                        <label
+                                            class="font-label-caps text-[11px] text-on-surface-variant tracking-widest">LOW
+                                            VOLTAGE CUTOFF</label>
+                                        <span id="val-low-volt" class="font-data-mono text-yellow-400 text-sm">3.40
+                                            V</span>
                                     </div>
-                                    <input type="range" id="slider-low-volt" min="300" max="420" value="340" class="w-full"
+                                    <input type="range" id="slider-low-volt" min="300" max="420" value="340"
+                                        class="w-full"
                                         oninput="document.getElementById('val-low-volt').innerText=(this.value/100).toFixed(2)+' V'">
                                 </div>
                             </div>
-
-                            <!-- Apply button -->
-                            <button onclick="applyDriveParams()" class="mt-6 w-full py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-bold tracking-widest hover:bg-primary/25 transition-colors">
+                            <button onclick="applyDriveParams()"
+                                class="mt-6 w-full py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-bold tracking-widest hover:bg-primary/25 transition-colors">
                                 APPLY &amp; SEND TO ESP32
                             </button>
                         </div>
+
                     </div>
                 </div>
 
             </div><!-- end page-maintenance -->
-            </div><!-- end max-w container -->
-        </main>
+    </div><!-- end max-w container -->
+    </main>
     </div>
 
     <script>
@@ -829,16 +891,15 @@
         function showPage(name) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + name).classList.add('active');
-
-            // Nav highlight
-            ['overview','maintenance'].forEach(n => {
+            ['overview', 'maintenance'].forEach(n => {
                 const el = document.getElementById('nav-' + n);
+                if (!el) return;
                 if (n === name) {
-                    el.classList.add('text-primary','bg-primary/10','border-r-2','border-primary');
-                    el.classList.remove('text-on-surface-variant','hover:text-on-surface','hover:bg-white/5');
+                    el.classList.add('text-primary', 'bg-primary/10', 'border-r-2', 'border-primary');
+                    el.classList.remove('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-white/5');
                 } else {
-                    el.classList.remove('text-primary','bg-primary/10','border-r-2','border-primary');
-                    el.classList.add('text-on-surface-variant','hover:text-on-surface','hover:bg-white/5');
+                    el.classList.remove('text-primary', 'bg-primary/10', 'border-r-2', 'border-primary');
+                    el.classList.add('text-on-surface-variant', 'hover:text-on-surface', 'hover:bg-white/5');
                 }
             });
         }
@@ -847,10 +908,10 @@
            5. ERROR LOG SYSTEM
            ========================================= */
         const eventLogs = [
-            { ts: new Date().toISOString(), level: 'CRITICAL', src: 'MPU6050', msg: 'ความเอียง (Pitch) ทะลุ 25° เสี่ยงตกจากแผงโซลาร์', val: '27.3°' },
-            { ts: new Date(Date.now()-60000).toISOString(), level: 'WARNING',  src: 'MPU6050', msg: 'อุณหภูมิเกิน 60°C เสี่ยงบอร์ดไหม้', val: '63.1°C' },
-            { ts: new Date(Date.now()-120000).toISOString(), level: 'WARNING',  src: 'INA219',  msg: 'แรงดันแบตเตอรี่ต่ำกว่าจุดวิกฤต (Low Voltage Cutoff)', val: '3.38 V' },
-            { ts: new Date(Date.now()-180000).toISOString(), level: 'INFO',     src: 'SYSTEM',  msg: 'ESP32 บูตสำเร็จ ระบบพร้อมทำงาน', val: '—' }
+            { ts: new Date().toISOString(), level: 'CRITICAL', src: 'MPU6050', msg: 'ความเอียง (Pitch) ทะลุ 25°', val: '27.3°' },
+            { ts: new Date(Date.now() - 60000).toISOString(), level: 'WARNING', src: 'MPU6050', msg: 'อุณหภูมิเกิน 60°C', val: '63.1°C' },
+            { ts: new Date(Date.now() - 120000).toISOString(), level: 'WARNING', src: 'INA219', msg: 'แรงดันแบตเตอรี่ต่ำกว่าจุดวิกฤต', val: '3.38 V' },
+            { ts: new Date(Date.now() - 180000).toISOString(), level: 'INFO', src: 'SYSTEM', msg: 'ESP32 บูตสำเร็จ ระบบพร้อมทำงาน', val: '—' }
         ];
         let currentFilter = 'ALL';
 
@@ -889,29 +950,30 @@
 
         function clearLogs() { eventLogs.length = 0; renderLogs(); }
 
-        // Hook into parseArduinoData to auto-log threshold violations
+        function addLog(level, src, msg, val) {
+            eventLogs.unshift({ ts: new Date().toISOString(), level, src, msg, val });
+            if (eventLogs.length > 100) eventLogs.pop();
+            const mPage = document.getElementById('page-maintenance');
+            if (mPage && mPage.classList.contains('active')) renderLogs();
+        }
+
+        // Auto-log threshold violations from telemetry
         const _origParse = parseArduinoData;
         function parseArduinoData(line) {
             _origParse(line);
             if (line.startsWith('PITCH:')) {
-                const v = parseFloat(line.replace('PITCH:',''));
+                const v = parseFloat(line.replace('PITCH:', ''));
                 const thr = parseInt(document.getElementById('slider-tilt-cut')?.value || 25);
-                if (Math.abs(v) > thr) addLog('CRITICAL','MPU6050',`Pitch ทะลุ ${thr}°`,v.toFixed(1)+'°');
+                if (Math.abs(v) > thr) addLog('CRITICAL', 'MPU6050', `Pitch ทะลุ ${thr}°`, v.toFixed(1) + '°');
             }
             if (line.startsWith('TEMP:')) {
-                const v = parseFloat(line.replace('TEMP:','').replace('C',''));
-                if (v > 60) addLog('WARNING','MPU6050',`อุณหภูมิเกิน 60°C`,v.toFixed(1)+'°C');
+                const v = parseFloat(line.replace('TEMP:', '').replace('C', ''));
+                if (v > 60) addLog('WARNING', 'MPU6050', 'อุณหภูมิเกิน 60°C', v.toFixed(1) + '°C');
             }
             if (line.startsWith('Battery:')) {
-                const v = parseFloat(line.replace('Battery:','').replace('%',''));
-                if (v < 10) addLog('WARNING','INA219','แรงดันแบตเตอรี่ต่ำกว่าจุดวิกฤต',v.toFixed(0)+'%');
+                const v = parseFloat(line.replace('Battery:', '').replace('%', ''));
+                if (v < 10) addLog('WARNING', 'INA219', 'แรงดันแบตต่ำ', v.toFixed(0) + '%');
             }
-        }
-
-        function addLog(level, src, msg, val) {
-            eventLogs.unshift({ ts: new Date().toISOString(), level, src, msg, val });
-            if (eventLogs.length > 100) eventLogs.pop();
-            if (document.getElementById('page-maintenance').classList.contains('active')) renderLogs();
         }
 
         renderLogs();
@@ -924,7 +986,7 @@
         function handleOtaFile(file) {
             if (!file) return;
             otaFile = file;
-            document.getElementById('ota-file-name').innerText = file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+            document.getElementById('ota-file-name').innerText = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
             document.getElementById('ota-flash-btn').disabled = false;
         }
 
@@ -940,19 +1002,18 @@
             if (!otaFile) return;
             if (!port) { alert('กรุณาเชื่อมต่อ ESP32 ก่อน'); return; }
             const wrap = document.getElementById('ota-progress-wrap');
-            const bar  = document.getElementById('ota-bar');
-            const pct  = document.getElementById('ota-pct');
+            const bar = document.getElementById('ota-bar');
+            const pct = document.getElementById('ota-pct');
             wrap.classList.remove('hidden');
-            // Simulated progress (real OTA needs ESP32-side HTTP OTA handler)
             let p = 0;
             const iv = setInterval(() => {
-                p = Math.min(p + Math.random()*8, 100);
+                p = Math.min(p + Math.random() * 8, 100);
                 bar.style.width = p + '%';
                 pct.innerText = p.toFixed(0) + '%';
                 if (p >= 100) {
                     clearInterval(iv);
                     pct.innerText = '100%';
-                    addLog('INFO','OTA','Firmware flashed: ' + otaFile.name, 'OK');
+                    addLog('INFO', 'OTA', 'Firmware flashed: ' + otaFile.name, 'OK');
                     setTimeout(() => wrap.classList.add('hidden'), 2000);
                 }
             }, 200);
@@ -961,15 +1022,15 @@
         async function applyDriveParams() {
             const sens = document.getElementById('slider-motor-sens').value;
             const brush = document.getElementById('slider-brush-spd').value;
-            const tilt  = document.getElementById('slider-tilt-cut').value;
-            const volt  = (document.getElementById('slider-low-volt').value / 100).toFixed(2);
+            const tilt = document.getElementById('slider-tilt-cut').value;
+            const volt = (document.getElementById('slider-low-volt').value / 100).toFixed(2);
             const cmd = `CFG:SENS${sens}:BRUSH${brush}:TILT${tilt}:VOLT${volt}\n`;
             if (writer) {
                 await writer.write(cmd);
-                addLog('INFO','CONFIG','Drive params applied: ' + cmd.trim(), 'OK');
+                addLog('INFO', 'CONFIG', 'Drive params applied: ' + cmd.trim(), 'OK');
             } else {
                 console.log('Simulate:', cmd);
-                addLog('INFO','CONFIG','[SIM] Drive params: ' + cmd.trim(), 'OK');
+                addLog('INFO', 'CONFIG', '[SIM] ' + cmd.trim(), 'OK');
             }
         }
 
